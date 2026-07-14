@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>DoXior Mods Hub | Shinko Engine 16</title>
+    <style>
+        /* ==========================================
+           SHINKO ENGINE 16 - ULTRA CORE DEFAULT
+           Architect: M. Nabil Irza Prawira
+           Company: ASNF Techno Lab
+           ========================================== */
+        
+        :root {
+            /* SHINKO LIQUID CRYSTAL ENGINE 6.0 */
+            --glass-blur-value: 160px;
+            --glass-blur: blur(var(--glass-blur-value)) saturate(350%);
+            --crystal-bg: rgba(255, 255, 255, 0.03);
+            --crystal-border: linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.02) 100%);
+            --crystal-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(255, 255, 255, 0.05);
+            
+            --ios-radius: 32px; 
+            --btn-radius: 40px; 
+            
+            /* Advanced Physics */
+            --spring-physics: cubic-bezier(0.4, 1.2, 0.4, 1);
+            --smooth-flow: cubic-bezier(0.25, 1, 0.5, 1);
+            --transition: all 0.5s var(--smooth-flow);
+            
+            /* Core Palette */
+            --bg-base: #030303;
+            --text-main: #ffffff;
+            --text-sub: rgba(235, 235, 245, 0.65);
+            --accent: #0a84ff;
+            --accent-glow: rgba(10, 132, 255, 0.5);
+            --asnf-purple: #bf5af2;
+            --success: #32d74b;
+            --warning: #ffd60a;
+        }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            font-size: clamp(14px, 1.3vw, 16px); 
+            scrollbar-width: none; 
+        }
+        body::-webkit-scrollbar { display: none; } 
+
+        /* DYNAMIC LERP MESH PARALLAX (GPU ACCELERATED) */
+        .mesh-bg {
+            position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; z-index: -1;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(10, 132, 255, 0.15) 0px, transparent 40%),
+                radial-gradient(at 80% 30%, rgba(191, 90, 242, 0.15) 0px, transparent 40%),
+                radial-gradient(at 90% 80%, rgba(10, 132, 255, 0.1) 0px, transparent 40%),
+                radial-gradient(at 20% 90%, rgba(255, 214, 10, 0.1) 0px, transparent 40%);
+            animation: meshFlow 35s ease-in-out infinite alternate;
+            will-change: transform, background-position;
+        }
+        @keyframes meshFlow { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+
+        /* LOADING SCREEN */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 9999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 1.2s var(--smooth-flow), visibility 1.2s; will-change: opacity, visibility;
+        }
+        .load-core {
+            font-size: 50px; font-weight: 900; letter-spacing: -2px; color: #fff;
+            background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            z-index: 2; opacity: 0; transform: scale(0.5); animation: corePop 1s var(--spring-physics) 0.3s forwards;
+        }
+        .load-text { font-size: 14px; font-weight: 800; color: var(--text-sub); letter-spacing: 5px; text-transform: uppercase; margin-top: 15px; opacity: 0; animation: fadeUp 1s var(--smooth-flow) 0.8s forwards;}
+        @keyframes corePop { to { opacity: 1; transform: scale(1); } }
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* ================= ASNF DOCK (PERFECT GEOMETRY) ================= */
+        /* Design Pattern: |___\ \______/ /___| */
+        .top-dock-container {
+            position: fixed; top: 0; left: 50%; transform: translateX(-50%) translateZ(0);
+            width: 100%; max-width: 1200px; z-index: 1000;
+            display: flex; justify-content: center; padding-top: 15px;
+            pointer-events: none; 
+        }
+        
+        .asnf-dock-wrapper {
+            display: flex; width: 92%; max-width: 620px;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));
+            pointer-events: auto; 
+            will-change: transform;
+        }
+
+        .dock-segment {
+            background: rgba(10, 10, 10, 0.65);
+            backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%);
+            display: flex; justify-content: center; align-items: center;
+            height: 65px; transition: var(--transition);
+            border-top: 1px solid rgba(255,255,255,0.15);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.02);
+        }
+        .dock-segment:hover { background: rgba(20, 20, 20, 0.75); }
+
+        /* |___\ (Logo Segment) */
+        .dock-left {
+            width: 90px; 
+            clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 100%, 0 100%);
+            border-top-left-radius: 30px; border-bottom-left-radius: 30px;
+            margin-right: -15px; padding-right: 10px; z-index: 2;
+        }
+
+        /* \______/ (Title Segment) */
+        .dock-center {
+            flex-grow: 1; 
+            clip-path: polygon(0 0, 100% 0, calc(100% - 20px) 100%, 20px 100%);
+            z-index: 1;
+        }
+
+        /* /___| (Hamburger Segment) */
+        .dock-right {
+            width: 90px; 
+            clip-path: polygon(20px 0, 100% 0, 100% 100%, 0 100%);
+            border-top-right-radius: 30px; border-bottom-right-radius: 30px;
+            margin-left: -15px; padding-left: 10px; cursor: pointer; z-index: 2;
+        }
+
+        /* Dock Content Styling */
+        .asnf-logo {
+            width: 38px; height: 38px; border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--asnf-purple));
+            display: flex; justify-content: center; align-items: center;
+            font-weight: 900; font-size: 16px; color: #fff; letter-spacing: -1px;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .dock-center-title { 
+            font-size: 15px; font-weight: 800; color: #fff; 
+            letter-spacing: 1px; text-transform: uppercase;
+            text-shadow: 0 2px 10px rgba(255,255,255,0.2);
+            transition: var(--transition);
+            text-align: center;
+            padding: 0 10px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hamburger-menu { width: 30px; height: 20px; display: flex; flex-direction: column; justify-content: space-between; }
+        .hamburger-line { width: 100%; height: 3px; background: #fff; border-radius: 5px; transition: var(--transition); }
+        
+        /* Mobile Overlay Menu */
+        .mobile-menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.88); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            z-index: 999; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;
+            opacity: 0; visibility: hidden; transition: var(--transition);
+        }
+        .mobile-menu-overlay.active { opacity: 1; visibility: visible; }
+        .menu-link { font-size: 24px; font-weight: 800; color: var(--text-sub); text-decoration: none; transition: var(--transition); cursor: pointer;}
+        .menu-link:hover, .menu-link.active { color: #fff; transform: scale(1.08); }
+
+        /* ================= LAYOUT & TABS ================= */
+        .app-layout { 
+            max-width: 1050px; margin: 0 auto; 
+            padding: clamp(20px, 5vw, 40px); padding-top: 130px; padding-bottom: 80px; 
+            box-sizing: border-box; 
+        }
+
+        .tab-section { display: none; opacity: 0; transform: scale(0.96) translateY(30px) translate3d(0,0,0); transition: var(--transition); will-change: opacity, transform; }
+        .tab-section.active { display: block; opacity: 1; transform: scale(1) translateY(0) translate3d(0,0,0); animation: smoothEntry 0.8s var(--spring-physics) forwards; }
+        @keyframes smoothEntry { 0% { opacity: 0; transform: translateY(40px) scale(0.95) translate3d(0,0,0); filter: blur(15px); } 100% { opacity: 1; transform: translateY(0) scale(1) translate3d(0,0,0); filter: blur(0); } }
+
+        /* HEADERS */
+        .hero-header { text-align: center; margin-bottom: 50px; }
+        .hero-title { font-size: clamp(34px, 5vw, 60px); font-weight: 900; letter-spacing: -2px; margin: 0; background: linear-gradient(to right, #fff, rgba(255,255,255,0.6)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.1; }
+        .hero-subtitle { font-size: clamp(13px, 1.8vw, 16px); color: var(--accent); font-weight: 700; letter-spacing: 3px; text-transform: uppercase; margin-top: 15px; }
+
+        /* GLASS CARD DEFAULT */
+        .glass-card {
+            background: var(--crystal-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: var(--ios-radius); padding: clamp(25px, 5vw, 40px); margin-bottom: 30px;
+            box-shadow: var(--crystal-shadow); color: #fff; position: relative; overflow: hidden;
+            transition: transform 0.6s var(--spring-physics), box-shadow 0.6s var(--smooth-flow);
+            will-change: transform;
+        }
+        .glass-card::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: var(--ios-radius); padding: 1px; background: var(--crystal-border);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+        }
+        .glass-card:hover { transform: scale(1.02) translateY(-8px) translate3d(0,0,0); box-shadow: 0 25px 50px rgba(0,0,0,0.6), inset 0 0 20px rgba(255,255,255,0.1); z-index: 10;}
+
+        .glass-card h2 { margin-top: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
+        .glass-card p { color: var(--text-sub); line-height: 1.8; font-size: 15px; margin-bottom: 15px;}
+
+        /* IOS SETTINGS LIST (SYSTEM STATUS / SPEC SHEETS) */
+        .ios-list { background: rgba(0,0,0,0.3); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;}
+        .ios-item { display: flex; justify-content: space-between; align-items: center; padding: 18px 25px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .ios-item:last-child { border-bottom: none; }
+        .ios-label { font-size: 15px; font-weight: 600; color: var(--text-sub); }
+        .ios-value { font-size: 15px; color: #fff; display: flex; align-items: center; gap: 8px;}
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulseDot 2s infinite;}
+        @keyframes pulseDot { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        /* COMPONENT GRID */
+        .component-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); 
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        /* CATEGORY FILTER */
+        .category-filter-wrapper {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 35px;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .category-filter-wrapper::-webkit-scrollbar { display: none; }
+
+        /* BUTTONS */
+        .btn-glass {
+            display: inline-flex; justify-content: center; align-items: center; text-decoration: none; box-sizing: border-box;
+            background: rgba(255,255,255,0.08); color: #fff; gap: 10px;
+            padding: 15px 30px; border-radius: var(--btn-radius); font-weight: 800; font-size: 13px; letter-spacing: 1px; 
+            transition: transform 0.4s var(--spring-physics), background 0.4s, box-shadow 0.4s; border: 1px solid rgba(255,255,255,0.15);
+            position: relative; overflow: hidden; transform: translateZ(0); cursor: pointer;
+            white-space: nowrap;
+        }
+        /* FIXED: Mengganti box-shadow kasar bertipe headlight menjadi premium layered-ambient glow khas iOS */
+        .btn-glass:hover, .btn-glass.active { 
+            background: #fff; 
+            color: #000; 
+            transform: scale(1.03) translateY(-3px) translate3d(0,0,0); 
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.15), 0 3px 8px rgba(255, 255, 255, 0.1); 
+        }
+
+        /* BADGES */
+        .badge {
+            background: rgba(10, 132, 255, 0.15); 
+            color: var(--accent); 
+            border: 1px solid rgba(10, 132, 255, 0.3); 
+            padding: 4px 12px; 
+            border-radius: 20px; 
+            font-size: 11px; 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* COMING SOON VISUAL */
+        .coming-soon-card {
+            text-align: center;
+            padding: 80px 40px;
+        }
+        .cs-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: floatIcon 4s ease-in-out infinite alternate;
+        }
+        @keyframes floatIcon {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-15px) rotate(5deg); }
+        }
+
+        /* SYSTEM / SOCIAL MEDIA SPLICED CARD */
+        .profile-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        @media(min-width: 768px) {
+            .profile-container { grid-template-columns: 1.2fr 0.8fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mesh-bg" id="meshBg"></div>
+
+    <!-- Shinko Loading Screen -->
+    <div id="loading-screen">
+        <div class="load-core">SE16</div>
+        <div class="load-text">INITIALIZING CORE</div>
+    </div>
+
+    <!-- Perfect Geometry Top Dock -->
+    <div class="top-dock-container">
+        <div class="asnf-dock-wrapper">
+            <div class="dock-segment dock-left" onclick="switchMenu('home', 'DoXior Mods Hub')" style="cursor: pointer;">
+                <div class="asnf-logo">SE</div>
+            </div>
+            
+            <div class="dock-segment dock-center">
+                <div class="dock-center-title" id="dockTitle">DoXior Mods Hub</div>
+            </div>
+            
+            <div class="dock-segment dock-right" onclick="toggleMenu()">
+                <div class="hamburger-menu" id="hamburger">
+                    <div class="hamburger-line" id="hl1"></div>
+                    <div class="hamburger-line" id="hl2"></div>
+                    <div class="hamburger-line" id="hl3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Navigation Overlay (Custom Menus) -->
+    <div class="mobile-menu-overlay" id="menuOverlay">
+        <a class="menu-link active" onclick="switchMenu('home', 'DoXior Mods Hub')">Home</a>
+        <a class="menu-link" onclick="switchMenu('pcbs1', 'PCBS 1 Mods')">PCBS 1 Mods</a>
+        <a class="menu-link" onclick="switchMenu('pcbs2', 'PCBS 2 Mods')">PCBS 2 Mods</a>
+        <a class="menu-link" onclick="switchMenu('gtav', 'GTA V Mods')">Grand Theft Auto V</a>
+        <a class="menu-link" onclick="switchMenu('doxior', 'Yutsaviz Project')">DoXior Yutsaviz Hanimaji</a>
+    </div>
+
+    <div class="app-layout">
+        
+        <!-- MENU 1: HOME -->
+        <div id="menu-home" class="tab-section active">
+            <header class="hero-header">
+                <h1 class="hero-title">DoXior Mods Hub</h1>
+                <p class="hero-subtitle">The Geometry Update</p>
+            </header>
+
+            <div class="glass-card" style="text-align: center;">
+                <h2>Welcome to DoXior Mods Hub</h2>
+                <p>
+                    Experience extreme simulation extension platforms engineered to push computational limits. Built natively under the <strong>Shinko Engine 16.0</strong> architecture. Our flagship custom assets deliver high-performance hardware, fully-optimized configurations, and unparalleled virtual realism to your gaming worlds.
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center; margin-top: 30px; flex-wrap: wrap;">
+                    <button class="btn-glass" onclick="switchMenu('pcbs1', 'PCBS 1 Mods')">Explore PCBS 1 Mods</button>
+                    <button class="btn-glass" style="background: var(--accent); color: #000; border: none;" onclick="switchMenu('doxior', 'Yutsaviz Project')">Project Details</button>
+                </div>
+            </div>
+
+            <div class="glass-card" style="border-left: 5px solid var(--accent);">
+                <h2 style="color: var(--accent);">Advanced Performance Standard</h2>
+                <p>All mods within the DoXior ecosystem are tuned to leverage multi-core processes, zero bottleneck operations, and maximum compatibility layouts. Browse our verified catalogs to elevate your virtual environments to the absolute tier.</p>
+            </div>
+        </div>
+
+        <!-- MENU 2: PC BUILDING SIMULATOR 1 -->
+        <div id="menu-pcbs1" class="tab-section">
+            <header class="hero-header">
+                <h1 class="hero-title">PCBS 1 Mods</h1>
+                <p class="hero-subtitle">Ecosystem Expansion Catalog</p>
+            </header>
+
+            <!-- ================= NEW DOWNLOAD LINK SECTION ================= -->
+            <div class="glass-card" style="text-align: center; margin-bottom: 30px;">
+                <div style="display: inline-block; margin-bottom: 15px;">
+                    <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">OFFICIAL RELEASE</span>
+                </div>
+                <h2 style="margin-bottom: 10px;">Main Download Link</h2>
+                <p style="color: var(--text-sub); max-width: 600px; margin: 0 auto 25px auto;">
+                    Unduh component pack utama untuk PC Building Simulator 1 langsung melalui halaman resmi Nexusmods.
+                </p>
+                <a href="https://www.nexusmods.com/pcbuildingsimulator/mods/347" target="_blank" class="btn-glass" style="background: var(--accent); color: #000; border: none; font-weight: 800; padding: 16px 40px; display: inline-flex; width: 100%; max-width: 400px; box-sizing: border-box; justify-content: center;">
+                    Download via Nexus Mods
+                </a>
+            </div>
+
+            <!-- ================= 16:9 IMAGE ASPECT SHOWCASE (DxRS1) ================= -->
+            <div class="glass-card" style="padding: 0; overflow: hidden; border-radius: var(--ios-radius); margin-bottom: 35px; aspect-ratio: 16/9; position: relative; box-shadow: var(--crystal-shadow);">
+                <img src="DxRS1.png" alt="DxRS1" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--ios-radius);">
+            </div>
+
+            <!-- Interactive Category Filter -->
+            <div class="category-filter-wrapper">
+                <button class="btn-glass filter-btn active" onclick="filterCategory('all', event)">All Components</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('cpu', event)">CPUs</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('gpu', event)">GPUs</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('ram', event)">RAM / Memory</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('storage', event)">Storage / SSD</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('psu', event)">Power Supplies</button>
+                <button class="btn-glass filter-btn" onclick="filterCategory('mobo', event)">Motherboards</button>
+            </div>
+
+            <div class="component-grid">
+                
+                <!-- CPUs -->
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DoXior DXZ 12-72030 KZs</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Cores</span><span class="ios-value">128 Cores</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Clockspeed</span><span class="ios-value">Base 5200 / Turbo 6000 MHz</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">The first groundbreaking flagship breaching the hundred-core limit with extreme stability.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DoXior DXZ 13-42000 KZs</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Cores</span><span class="ios-value">132 Cores</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Clockspeed</span><span class="ios-value">Base 6000 / Turbo 6800 MHz</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Second-generation monster processor featuring ultra-high native base clock rates.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DoXior DXZ Radamanth 18-12980DX</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Cores</span><span class="ios-value">144 Cores</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Clockspeed</span><span class="ios-value">Base 5800 / Turbo 7200 MHz</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">The absolute king of CPUs, optimized for extreme frequencies to shatter 3DMark world records.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ Lanaines 1-1000 AM4</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Socket</span><span class="ios-value">AMD AM4</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Budget-friendly segment for the AM4 socket, perfect for cost-effective customer orders in Career Mode.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ Lanaines 1-1000 LGA 1151</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Socket</span><span class="ios-value">Intel 1151 Skylake</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">The cheapest variant for LGA 1151, engineered so entry-level players can experience the DoXior ecosystem.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ Lanaines 1-1103 AM4</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Socket</span><span class="ios-value">AMD AM4</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Low-power daily driver variant for AMD AM4, supporting high, safe frequencies for standard motherboards.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="cpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ Lanaines 1-1103 LGA 1151</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">CPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Socket</span><span class="ios-value">Intel 1151 Skylake</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Intel LGA 1151 Skylake variant featuring an optimized architecture for highly responsive daily operations.</span></div>
+                    </div>
+                </div>
+
+                <!-- GPUs -->
+                <div class="glass-card component-card" data-category="gpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ DaeNoma RTX FKa 9071</h3>
+                        <span class="badge" style="background: rgba(191, 90, 242, 0.15); color: var(--asnf-purple); border-color: rgba(191, 90, 242, 0.3);">GPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">VRAM</span><span class="ios-value">32 GB</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Core Clock</span><span class="ios-value">3018 MHz</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">An early flagship-tier GPU that remains incredibly stable even when breaking the 3.0 GHz barrier.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="gpu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXZ DaeNoma FKa 10015 RTX</h3>
+                        <span class="badge" style="background: rgba(191, 90, 242, 0.15); color: var(--asnf-purple); border-color: rgba(191, 90, 242, 0.3);">GPU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">VRAM</span><span class="ios-value">32 GB</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Core Clock</span><span class="ios-value">3300 MHz</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">The ultimate performance-tuned GPU featuring extreme clock rates for maximum gaming benchmark power.</span></div>
+                    </div>
+                </div>
+
+                <!-- RAM -->
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120k DDR5 (512GB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR5 High-Speed</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Motherboard Lock</span><span class="ios-value">Demon Xw2 Exclusive</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">512GB massive capacity. Tuned exclusively to match the architectural standard of Demon Xw2.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120k DDR5 (2TB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR5 High-Speed</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Motherboard Lock</span><span class="ios-value">Demon Xw2 Exclusive</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">An ultra-capacity 2 Terabyte module setup, locked securely for server-grade Demon Xw2 motherboards.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120k DDR5 (8TB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR5 High-Speed</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Configuration</span><span class="ios-value">Single Stick</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Monster 8 Terabyte high-speed DDR5 single-stick module. Exclusively locked to the Demon Xw2.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120F DDR4 (8GB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR4 Universal</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">8GB universal DDR4. Standard motherboard-friendly budget version designed for everyday PC tasks.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120F DDR4 (16GB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR4 Universal</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">16GB universal DDR4. Standard motherboard-friendly version providing excellent power balance.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="ram">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">DXs Banmatte 120F DDR4 (32GB)</h3>
+                        <span class="badge" style="background: rgba(50, 215, 75, 0.15); color: var(--success); border-color: rgba(50, 215, 75, 0.3);">RAM</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type & Speed</span><span class="ios-value">DDR4 Universal</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">32GB high-density universal DDR4. Tailored for heavy-workload standard motherboard configurations.</span></div>
+                    </div>
+                </div>
+
+                <!-- Storage -->
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D1 Pro 512GB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Standard Class SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">High-reliability everyday storage series featuring standard 512GB capacity.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D1 Pro 2TB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Standard Class SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">High-reliability everyday storage series with a spacious 2 Terabyte layout.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D1 Pro 50th SE 8TB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Edition</span><span class="ios-value">Special Edition (50th SE)</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Special Edition berkapasitas 8 Terabyte featuring highly-optimized read & write configurations.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D2 Pro 512GB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Premium Performance SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Premium high-performance storage module featuring 512GB of reliable flash layout.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D2 Pro 2TB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Premium Performance SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">High-performance premium storage line, delivering 2 Terabytes of extreme write capacity.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D2 Pro 6TB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Premium Performance SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Heavy duty high-performance storage line with an ultra-roomy 6 Terabyte workspace.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha D2 Pro 8TB</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Premium Performance SSD</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Our highest flagship performance tier, housing 8 Terabytes of blazing fast memory modules.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha Delta A1 (8GB)</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Tier Class</span><span class="ios-value">Budget Economical Storage</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Ultra-budget 8GB capacity variant, perfect for cheap builds or experimental configurations.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha Delta A1 D3 (8GB)</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type Variant</span><span class="ios-value">D3 Architecture</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Budget-conscious D3 type 8GB capacity variant for highly affordable builds and experiments.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha Delta A1 D3.6 (8GB)</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type Variant</span><span class="ios-value">D3.6 Architecture</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">An economical D3.6 module variant designed for absolute cost-effective integration.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="storage">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Samantha Delta A1 D4 (8GB)</h3>
+                        <span class="badge" style="background: rgba(255, 214, 10, 0.15); color: var(--warning); border-color: rgba(255, 214, 10, 0.3);">SSD</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Type Variant</span><span class="ios-value">D4 Architecture</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Standard budget D4 layout 8GB capacity storage, built exclusively as a cheap secondary drive.</span></div>
+                    </div>
+                </div>
+
+                <!-- PSUs -->
+                <div class="glass-card component-card" data-category="psu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Araita 1DX 450W</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">PSU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Max Power</span><span class="ios-value">450 Watts</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Entry-level power supply unit, engineered for daily office builds or energy-efficient rigs.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="psu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Araita 1DX 750W</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">PSU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Max Power</span><span class="ios-value">750 Watts</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Mid-range class power supply unit, delivering highly-efficient current for standard builds.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="psu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Araita 6DX 2100W</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">PSU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Max Power</span><span class="ios-value">2100 Watts</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Cabling</span><span class="ios-value">Fully Modular</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">First-generation 2100W modular power supply, featuring clean and optimized wire routing.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="psu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Araita 7DX 2100W</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">PSU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Max Power</span><span class="ios-value">2100 Watts</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Generation</span><span class="ios-value">Next Gen High-End</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Latest generation premium 2100W power delivery unit, engineered for heavy-duty daily overclocking.</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card component-card" data-category="psu">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Araita 7DX 3200W</h3>
+                        <span class="badge" style="background: rgba(10, 132, 255, 0.15); color: var(--accent);">PSU</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Max Power</span><span class="ios-value">3200 Watts</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Design</span><span class="ios-value">Ultra-Massive Extreme</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Ultra-massive power supply. Custom built to feed the Radamanth 144-core CPU and dual DaeNoma GPUs.</span></div>
+                    </div>
+                </div>
+
+                <!-- Motherboard -->
+                <div class="glass-card component-card" data-category="mobo">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                        <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #fff;">Demon Xw2 Motherboard</h3>
+                        <span class="badge" style="background: rgba(191, 90, 242, 0.15); color: var(--asnf-purple); border-color: rgba(191, 90, 242, 0.3);">MOBO</span>
+                    </div>
+                    <div class="ios-list" style="margin-bottom: 0; background: rgba(0,0,0,0.2);">
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Form Factor</span><span class="ios-value">SSI-EEB Jumbo Size</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Socket</span><span class="ios-value">SP6 Special Dual-Socket (2P)</span></div>
+                        <div class="ios-item" style="padding: 10px 15px;"><span class="ios-label">Memory Support</span><span class="ios-value">DDR5 K-Series Exclusive</span></div>
+                        <div class="ios-item" style="padding: 12px 15px; border-bottom: none;"><span class="ios-label">Detail</span><span class="ios-value" style="text-align: right; line-height: 1.4; color: var(--text-sub);">Armed with god-tier VRMs to sustain the massive power draw of the 144-core Radamanth CPUs.</span></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- MENU 3: PC BUILDING SIMULATOR 2 (COMING SOON) -->
+        <div id="menu-pcbs2" class="tab-section">
+            <header class="hero-header">
+                <h1 class="hero-title">PCBS 2 Mods</h1>
+                <p class="hero-subtitle">Next Generation Assets</p>
+            </header>
+
+            <div class="glass-card coming-soon-card">
+                <div class="cs-icon">💼</div>
+                <h2>Expansion Underway</h2>
+                <p>
+                    The next evolution of component customization is in the pipeline. We are currently reverse-engineering and adapting our 3D libraries to bring advanced lighting assets, custom liquid loops, and hyper-detailed casings into PC Building Simulator 2.
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;">
+                    <div class="status-dot" style="background: var(--warning); box-shadow: 0 0 10px var(--warning);"></div>
+                    <span style="font-weight: 800; font-size: 14px; color: var(--warning); letter-spacing: 1px; text-transform: uppercase;">Development Queue Active</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU 4: GRAND THEFT AUTO V (COMING SOON) -->
+        <div id="menu-gtav" class="tab-section">
+            <header class="hero-header">
+                <h1 class="hero-title">Grand Theft Auto V</h1>
+                <p class="hero-subtitle">Indonesian Modification Suite</p>
+            </header>
+
+            <div class="glass-card coming-soon-card" style="border-left: 5px solid var(--asnf-purple);">
+                <div class="cs-icon">🚔</div>
+                <h2 style="color: var(--asnf-purple);">Indonesian Assets Coming Soon</h2>
+                <p>
+                    Bringing localized immersion straight to Los Santos and your custom FiveM servers. Our team is rendering real-world high-quality vehicle configurations, local infrastructure assets, and optimized roleplay props crafted specifically to run smoothly under high-count user populations.
+                </p>
+                <div style="display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 25px;">
+                    <div class="status-dot" style="background: var(--accent); box-shadow: 0 0 10px var(--accent);"></div>
+                    <span style="font-weight: 800; font-size: 14px; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Render Pipeline: Phase 1</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- MENU 5: DOXIOR YUTSAVIZ HANIMAJI (PROJECT & DEV) -->
+        <div id="menu-doxior" class="tab-section">
+            <header class="hero-header">
+                <h1 class="hero-title">DoXior Project</h1>
+                <p class="hero-subtitle">Yutsaviz Hanimaji Overview</p>
+            </header>
+
+            <!-- ================= 16:9 IMAGE ASPECT SHOWCASE (DxRS2) ================= -->
+            <div class="glass-card" style="padding: 0; overflow: hidden; border-radius: var(--ios-radius); margin-bottom: 35px; aspect-ratio: 16/9; position: relative; box-shadow: var(--crystal-shadow);">
+                <img src="DxRS2.png" alt="DxRS2" style="width: 100%; height: 100%; object-fit: cover; display: block; border-radius: var(--ios-radius);">
+            </div>
+
+            <div class="profile-container">
+                <div class="glass-card">
+                    <h2>Project Blueprint</h2>
+                    <p style="font-size: 16px; font-weight: bold; color: var(--accent); margin-bottom: 20px;">
+                        DoXior Yutsaviz Hanimaji &mdash; Indonesian DoXior Project
+                    </p>
+                    <p>
+                        A unified virtual expansion ecosystem engineered to bridge extreme hardware limitations and custom high-fidelity textures. Managed and developed globally as an exclusive asset division under <strong>ASNF Techno Lab</strong>.
+                    </p>
+                    <p>
+                        Our mission is to empower gamers with modular hardware that redefines gaming thresholds, guaranteeing maximum compatibility, rich simulation details, and highly optimized script integrations across all target platform simulations.
+                    </p>
+                </div>
+
+                <div class="glass-card">
+                    <h2>System Directory</h2>
+                    <div class="ios-list" style="background: rgba(0,0,0,0.25);">
+                        <div class="ios-item">
+                            <span class="ios-label">Lead Developer</span>
+                            <span class="ios-value" style="font-weight: 800; color: #fff;">M. Nabil Irza Prawira</span>
+                        </div>
+                        <div class="ios-item">
+                            <span class="ios-label">Parent Tech Corp</span>
+                            <span class="ios-value" style="font-weight: 800; color: var(--accent);">ASNF Techno Lab</span>
+                        </div>
+                        <div class="ios-item">
+                            <span class="ios-label">Build Version</span>
+                            <span class="ios-value">v1.2 stable</span>
+                        </div>
+                    </div>
+
+                    <h2 style="margin-top: 30px;">Social Directory</h2>
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                        <a href="https://instagram.com/n4bilirzap.zw" target="_blank" class="btn-glass" style="justify-content: flex-start; padding: 12px 20px;">
+                            <span>📸</span> Instagram: @n4bilirzap.zw
+                        </a>
+                        <a href="https://t.me/n4bilirz" target="_blank" class="btn-glass" style="justify-content: flex-start; padding: 12px 20px;">
+                            <span>✈️</span> Telegram: @n4bilirz
+                        </a>
+                        <a href="https://t.me/irzazw" target="_blank" class="btn-glass" style="justify-content: flex-start; padding: 12px 20px;">
+                            <span>✈️</span> Telegram Backup: @irzazw
+                        </a>
+                        <a href="https://tiktok.com/@n4bilirzap.zw" target="_blank" class="btn-glass" style="justify-content: flex-start; padding: 12px 20px;">
+                            <span>🎵</span> TikTok: @n4bilirzap.zw
+                        </a>
+                        <a href="https://github.com/asnf-techno-lab" target="_blank" class="btn-glass" style="justify-content: flex-start; padding: 12px 20px; border-color: var(--asnf-purple);">
+                            <span>💻</span> GitHub: ASNF Techno Lab
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; font-size: 13px; color: rgba(255,255,255,0.3); font-weight: 600;">
+                &copy; 2026 ASNF Techno Lab. All Rights Reserved. Managed by AnXin Technology Project.
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. ASNF HAPTIC ENGINE ---
+        function triggerHaptic(duration = 40) {
+            if (navigator.vibrate) { navigator.vibrate(duration); }
+        }
+        document.querySelectorAll('.btn-glass, .dock-segment, .menu-link').forEach(el => {
+            el.addEventListener('click', () => triggerHaptic(50));
+        });
+
+        // --- 2. AUTOMATIC FIX BUG (INTERCEPTOR) ---
+        window.onerror = function(message, source, lineno, colno, error) {
+            console.warn("[Shinko Engine 16 Core] Auto-Fix Intercepted:", message);
+            return true; 
+        };
+
+        // --- 3. TOP DOCK HAMBURGER MENU LOGIC ---
+        const menuOverlay = document.getElementById('menuOverlay');
+        const hl1 = document.getElementById('hl1');
+        const hl2 = document.getElementById('hl2');
+        const hl3 = document.getElementById('hl3');
+        let menuOpen = false;
+
+        function toggleMenu() {
+            menuOpen = !menuOpen;
+            if(menuOpen) {
+                menuOverlay.classList.add('active');
+                hl1.style.transform = 'rotate(45deg) translate(5px, 6px)';
+                hl2.style.opacity = '0';
+                hl3.style.transform = 'rotate(-45deg) translate(6px, -7px)';
+            } else {
+                menuOverlay.classList.remove('active');
+                hl1.style.transform = 'none';
+                hl2.style.opacity = '1';
+                hl3.style.transform = 'none';
+            }
+        }
+
+        // --- 4. SMART TAB NAVIGATION ---
+        function switchMenu(menuId, title) {
+            // Close mobile menu overlay if open
+            if(menuOpen) toggleMenu();
+
+            // Update title in Dock Center with transitions
+            const dockTitle = document.getElementById('dockTitle');
+            dockTitle.style.opacity = '0';
+            setTimeout(() => {
+                dockTitle.innerText = title;
+                dockTitle.style.opacity = '1';
+            }, 250);
+
+            // Hide all sections
+            document.querySelectorAll('.tab-section').forEach(tab => {
+                tab.classList.remove('active');
+                setTimeout(() => { if(!tab.classList.contains('active')) tab.style.display = 'none'; }, 500); 
+            });
+
+            // Update active state inside overlays
+            document.querySelectorAll('.menu-link').forEach(link => { link.classList.remove('active'); });
+            const clickedLink = Array.from(document.querySelectorAll('.menu-link')).find(el => el.innerText === title || el.innerText.includes(title));
+            if(clickedLink) clickedLink.classList.add('active');
+
+            // Display target section with entry animations
+            const targetTab = document.getElementById('menu-' + menuId);
+            targetTab.style.display = 'block';
+            void targetTab.offsetWidth; // Force CSS Reflow
+            targetTab.classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- 5. CATEGORY FILTER (PCBS 1) ---
+        function filterCategory(category, event) {
+            // Active button state transition
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            if(event) {
+                event.currentTarget.classList.add('active');
+            }
+
+            const cards = document.querySelectorAll('.component-card');
+            cards.forEach(card => {
+                if(category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                    setTimeout(() => { 
+                        card.style.opacity = '1'; 
+                        card.style.transform = 'scale(1) translateY(0)'; 
+                    }, 50);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95) translateY(10px)';
+                    setTimeout(() => { card.style.display = 'none'; }, 300);
+                }
+            });
+        }
+
+        // --- 6. ADVANCED LERP PARALLAX (Smooth GPU Accel) ---
+        const meshBg = document.getElementById('meshBg');
+        let targetX = 0, targetY = 0;
+        let currentX = 0, currentY = 0;
+        const lerpFactor = 0.05; 
+
+        function updateParallax() {
+            if(window.innerWidth > 800) {
+                currentX += (targetX - currentX) * lerpFactor;
+                currentY += (targetY - currentY) * lerpFactor;
+                meshBg.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) scale(1.05)`;
+            }
+            requestAnimationFrame(updateParallax);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            targetX = (e.clientX / window.innerWidth - 0.5) * 30; 
+            targetY = (e.clientY / window.innerHeight - 0.5) * 30;
+        });
+        window.addEventListener('mouseleave', () => { targetX = 0; targetY = 0; });
+        requestAnimationFrame(updateParallax);
+
+        // --- 7. DYNAMIC FPS OPTIMIZER (SHINKO CACHE 4.0) ---
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        function fpsOptimizerLoop() {
+            const now = performance.now();
+            frameCount++;
+            if (now - lastTime >= 1000) {
+                if (frameCount < 40) { 
+                    document.documentElement.style.setProperty('--glass-blur-value', '80px');
+                    meshBg.style.willChange = 'auto'; 
+                } else { 
+                    document.documentElement.style.setProperty('--glass-blur-value', '160px');
+                    meshBg.style.willChange = 'transform, background-position';
+                }
+                frameCount = 0; lastTime = now;
+            }
+            requestAnimationFrame(fpsOptimizerLoop);
+        }
+        requestAnimationFrame(fpsOptimizerLoop);
+
+        // --- 8. BOOT SEQUENCE ---
+        window.addEventListener('load', () => {
+            const loader = document.getElementById('loading-screen');
+            setTimeout(() => {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.style.visibility = 'hidden';
+                    loader.style.display = 'none';
+                }, 1200); 
+            }, 3000); 
+        });
+    </script>
+</body>
+</html>
